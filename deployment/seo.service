@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve PASTA SEO services
+After=network.target
+
+[Service]
+User=pasta
+Group=www-data
+WorkingDirectory=/home/pasta/seo
+Environment="PATH=/home/pasta/anaconda3/envs/seo/bin"
+ExecStart=/home/pasta/anaconda3/envs/seo/bin/uwsgi --ini deployment/seo.ini
+
+[Install]
+WantedBy=multi-user.target
