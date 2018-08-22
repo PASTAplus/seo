@@ -103,5 +103,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# IntelliJ
+# JetBrains IDEA artifacts
 .idea
+
+# Project files
+config.py
+cache
