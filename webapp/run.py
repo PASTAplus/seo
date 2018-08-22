@@ -12,28 +12,37 @@
     8/16/18
 """
 import daiquiri
-from flask import Flask, request
+from flask import abort, Flask, request
+import requests
 
+from webapp.config import Config
 import webapp.schema_org as schema_org
 
 
-logger = daiquiri.getLogger('run: ' + __name__)
-
+logger = daiquiri.getLogger('run.py: ' + __name__)
 
 app = Flask(__name__)
+app.config.from_object(Config)
 
-
-@app.route('/')
+@app.route('/seo')
 def hello_world():
-    return 'Hello World!'
+    return 'Hello on Wheels!'
 
 
-@app.route('/schema/dataset')
+@app.route('/seo/schema/dataset')
 def schema():
     pid = request.args.get('pid')
     env = request.args.get('env')
-    return schema_org.dataset(pid=pid)
+    raw = request.args.get('raw')
+
+    try:
+        response = schema_org.dataset(pid=pid, env=env, raw=raw)
+    except requests.exceptions.ConnectionError as e:
+        logger.error(e)
+        abort(400)
+    else:
+        return response
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
