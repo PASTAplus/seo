@@ -12,46 +12,69 @@
     8/16/18
 """
 import json
+import os.path
 
-import daiquiri
 import requests
 
-from eml_2_1_1 import Eml
+from webapp.config import Config
+from webapp.eml_2_1_1 import Eml
 
-logger = daiquiri.getLogger('shchema_org: ' + __name__)
 open_tag = '<script type="application/ld+json">\n'
 close_tag = '\n</script>'
 
-def dataset(pid: str, env: str=None):
 
-    json_ld = {}
+def dataset(pid: str, env: str=None, raw: str=None):
+
+    json_ld = dict()
     json_ld['@context'] = "http://schema.org"
     json_ld['@type'] = "Dataset"
 
-    _ = pid.split('.')
-    pid_frag = f'{_[0]}/{_[1]}/{_[2]}'
-    if env in ('d', 's'):
-        dpath = f'https://pasta-{env}.lternet.edu/package'
+    if env in ('d', 'dev', 'development'):
+        dpath = Config.PASTA_D
+        cache = Config.CACHE_D
+    elif env in ('s', 'stage', 'staging'):
+        dpath = Config.PASTA_S
+        cache = Config.CACHE_S
     else:
-        dpath = f'https://pasta.lternet.edu/package'
-    pasta_uri = f'{dpath}/metadata/eml/{pid_frag}'
+        dpath = Config.PASTA_P
+        cache = Config.CACHE_P
 
-    r = requests.get(pasta_uri)
-    if r.status_code == requests.codes.ok:
-        eml = r.text
+
+    file_path = f'{cache}{pid}.json'
+
+    if os.path.isfile(file_path):
+        # Read from cached location
+        with open(file_path, 'r') as fp:
+            j = fp.read()
     else:
-        raise requests.exceptions.ConnectionError()
+        # Read from PASTA web service
+        _ = pid.split('.')
+        pid_frag = f'{_[0]}/{_[1]}/{_[2]}'
+        pasta_uri = f'{dpath}/metadata/eml/{pid_frag}'
 
-    eml = Eml(eml=eml)
-    name = eml.title
-    description = eml.abstract
+        r = requests.get(pasta_uri)
+        if r.status_code == requests.codes.ok:
+            eml = r.text
+        else:
+            raise requests.exceptions.ConnectionError()
 
-    json_ld['name'] = name
-    json_ld['description'] = description
-    j = json.dumps(json_ld, indent=2)
-    html = f'{open_tag}{j}{close_tag}'
+        eml = Eml(eml=eml)
+        name = eml.title
+        description = eml.abstract
 
-    return html
+        json_ld['name'] = name
+        json_ld['description'] = description
+        j = json.dumps(json_ld, indent=2)
+        with open(file_path, 'w') as fp:
+            fp.write(j)
+
+    if raw in ('t', 'T', 'true', 'True'):
+        response = j
+    else:
+        response = f'{open_tag}{j}{close_tag}'
+
+    return response
+
 
 def main():
     return 0
