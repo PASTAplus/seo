@@ -26,3 +26,17 @@ class Config(object):
     PASTA_P = 'https://pasta.lternet.edu/package'
     PASTA_S = 'https://pasta-s.lternet.edu/package'
     PASTA_D = 'https://pasta-d.lternet.edu/package'
+
+    PORTAL_P = 'https://portal.edirepository.org/nis'
+    PORTAL_S = 'https://portal-s.edirepository.org/nis'
+    PORTAL_D = 'https://portal-d.edirepository.org/nis'
+
+    DESCRIPTION_EDI = 'The Environmental Data Initiative is an NSF-funded' + \
+        ' project accelerating curation and archive of environmental data,' + \
+        ' emphasizing data from projects funded by the NSF DEB.  Programs' + \
+        ' served include, but are not limited to, Long Term Research in' + \
+        ' Environmental Biology (LTREB), Organization for Biological Field' + \
+        ' Stations (OBFS), MacroSystems Biology (MSB), and Long Term' + \
+        ' Ecological Research (LTER).'
+
+    URL_EDI = 'https://environmentaldatainitiative.org'
