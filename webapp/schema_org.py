@@ -110,8 +110,8 @@ def dataset(pid: str, env: str=None, raw: str=None):
             json_ld['keywords'] = eml.keywords
 
         j = json.dumps(json_ld, indent=2)
-        # with open(file_path, 'w') as fp:
-        #     fp.write(j)
+        with open(file_path, 'w') as fp:
+            fp.write(j)
 
     if raw in ('t', 'T', 'true', 'True'):
         response = j
