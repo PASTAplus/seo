@@ -17,6 +17,7 @@ import requests
 
 from webapp.config import Config
 import webapp.schema_org as schema_org
+import webapp.sitemaps_org as sitemaps_org
 
 
 logger = daiquiri.getLogger('run.py: ' + __name__)
@@ -30,7 +31,7 @@ def hello_world():
 
 
 @app.route('/seo/schema/dataset')
-def schema():
+def dataset():
     pid = request.args.get('pid')
     env = request.args.get('env')
     raw = request.args.get('raw')
@@ -42,6 +43,22 @@ def schema():
         abort(400)
     else:
         return response
+
+@app.route('/seo/schema/sitemap', methods=['GET', 'POST'])
+def sitemap():
+    if request.environ['REQUEST_METHOD'] == 'GET':
+        # return sitemap.xml
+        pass
+    else: # POST from PASTA
+        # add to sitemap.xml
+        remote_address = request.environ['REMOTE_ADDR']
+        print(remote_address)
+        if remote_address not in Config.WHITE_LIST:
+            abort(403)
+        else:
+            pid = request.get_data().decode('utf-8')
+            env = Config.WHITE_LIST[remote_address]
+    return "Howdy ho neighbor"
 
 
 if __name__ == '__main__':
