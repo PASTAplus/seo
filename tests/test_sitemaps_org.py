@@ -33,6 +33,10 @@ class TestSitemapsOrg(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_generate_sitemap(self):
+        sitemap = sitemaps_org.generate_sitemap(env=Config.PASTA_P)
+        self.assertIsNotNone(sitemap)
+
     def test_get_count(self):
         count = sitemaps_org.get_count(env=Config.PASTA_P)
         self.assertGreater(count, 0)
