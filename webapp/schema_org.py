@@ -18,6 +18,7 @@ import requests
 
 from webapp.config import Config
 from webapp.eml import Eml
+import webapp.utility as utility
 
 open_tag = '<script type="application/ld+json">\n'
 close_tag = '\n</script>'
@@ -46,9 +47,8 @@ def dataset(pid: str, env: str=None, raw: str=None):
         with open(file_path, 'r') as fp:
             j = fp.read()
     else:
-        # Read from PASTA web service
-        _ = pid.split('.')
-        pid_frag = f'{_[0]}/{_[1]}/{_[2]}'
+        scope, identifier, revision = utility.pid_triple(pid)
+        pid_frag = f'{scope}/{identifier}/{revision}'
         eml_uri = f'{pasta}/metadata/eml/{pid_frag}'
         doi_uri = f'{pasta}/doi/eml/{pid_frag}'
         portal_uri = f'{portal}/metadataviewer?packageid={pid}'
