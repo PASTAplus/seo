@@ -38,27 +38,22 @@ def dataset():
 
     try:
         response = schema_org.dataset(pid=pid, env=env, raw=raw)
+        return response
     except requests.exceptions.ConnectionError as e:
         logger.error(e)
         abort(400)
-    else:
-        return response
 
-@app.route('/seo/schema/sitemap', methods=['GET', 'POST'])
+@app.route('/seo/schema/sitemap', methods=['GET'])
 def sitemap():
     if request.environ['REQUEST_METHOD'] == 'GET':
-        # return sitemap.xml
-        pass
-    else: # POST from PASTA
-        # add to sitemap.xml
-        remote_address = request.environ['REMOTE_ADDR']
-        print(remote_address)
-        if remote_address not in Config.WHITE_LIST:
-            abort(403)
-        else:
-            pid = request.get_data().decode('utf-8')
-            env = Config.WHITE_LIST[remote_address]
-    return "Howdy ho neighbor"
+        env = request.args.get('env')
+
+        try:
+            sitemap = sitemaps_org.generate_sitemap(env=env)
+            return sitemap
+        except requests.exceptions.ConnectionError as e:
+            logger.error(e)
+            abort(400)
 
 
 if __name__ == '__main__':
