@@ -43,6 +43,7 @@ def dataset():
         logger.error(e)
         abort(400)
 
+
 @app.route('/seo/schema/sitemap', methods=['GET'])
 def sitemap():
     if request.environ['REQUEST_METHOD'] == 'GET':
