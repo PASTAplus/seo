@@ -22,20 +22,26 @@ import webapp.utility as utility
 logger = daiquiri.getLogger('sitemaps_org: ' + __name__)
 
 
-def generate_sitemap(env: str=Config.PASTA_P) -> str:
-    if env == Config.PASTA_D:
+def generate_sitemap(env: str=None) -> str:
+    if env in ('d', 'dev', 'development'):
+        pasta = Config.PASTA_D
         portal = Config.PORTAL_D
-    elif env == Config.PASTA_S:
+        cache = Config.CACHE_D
+    elif env in ('s', 'stage', 'staging'):
+        pasta = Config.PASTA_S
         portal = Config.PORTAL_S
+        cache = Config.CACHE_S
     else:
+        pasta = Config.PASTA_P
         portal = Config.PORTAL_P
+        cache = Config.CACHE_P
 
     nsmap = {None: 'http://www.sitemaps.org/schemas/sitemap/0.9'}
     urlset = etree.Element('urlset', nsmap=nsmap)
     sitemap = etree.ElementTree(urlset)
 
-    count = get_count(env=env)
-    pids = get_pids(env=env, start=0, rows=count)
+    count = get_count(env=pasta)
+    pids = get_pids(env=pasta, start=0, rows=count)
     for pid in pids:
         scope, identifier, revision = utility.pid_triple(pid=pid)
         location = f'{portal}/mapbrowse?scope={scope}&' + \
@@ -45,7 +51,9 @@ def generate_sitemap(env: str=Config.PASTA_P) -> str:
         loc.text = location
         urlset.append(url)
 
-    return etree.tostring(sitemap)
+    sitemap_xml = etree.tostring(sitemap, pretty_print=True).decode('utf-8')
+
+    return sitemap_xml
 
 
 def get_count(env: str=Config.PASTA_P) -> int:
@@ -84,6 +92,18 @@ def get_pids(env: str=Config.PASTA_P, start: int=0, rows: int=Config.ROWS):
 
 
 def main():
+    sitemap = generate_sitemap(env='p')
+    with open(f'{Config.CACHE_P}/sitemap.xml', 'w') as fp:
+        fp.write(sitemap)
+
+    sitemap = generate_sitemap(env='s')
+    with open(f'{Config.CACHE_S}/sitemap.xml', 'w') as fp:
+        fp.write(sitemap)
+
+    sitemap = generate_sitemap(env='d')
+    with open(f'{Config.CACHE_D}/sitemap.xml', 'w') as fp:
+        fp.write(sitemap)
+
     return 0
 
 
