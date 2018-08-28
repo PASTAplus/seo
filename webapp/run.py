@@ -12,7 +12,7 @@
     8/16/18
 """
 import daiquiri
-from flask import abort, Flask, request
+from flask import abort, Flask, request, send_file
 import requests
 
 from webapp.config import Config
@@ -49,8 +49,8 @@ def sitemap():
         env = request.args.get('env')
 
         try:
-            sitemap = sitemaps_org.generate_sitemap(env=env)
-            return sitemap
+            sitemap_bundle = sitemaps_org.generate_sitemap_bundle(env=env)
+            return send_file(sitemap_bundle)
         except requests.exceptions.ConnectionError as e:
             logger.error(e)
             abort(400)
