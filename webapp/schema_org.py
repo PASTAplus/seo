@@ -96,7 +96,7 @@ def dataset(pid: str, env: str=None, raw: str=None):
         json_ld['includedInDataCatalog'] = {
             '@type': 'DataCatalog',
             '@id': Config.URL_EDI,
-            'name': 'Environmental Data Initiatve',
+            'name': 'Environmental Data Initiative',
             'description': Config.DESCRIPTION_EDI,
             'url': portal
         }
