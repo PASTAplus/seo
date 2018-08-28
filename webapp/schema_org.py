@@ -113,7 +113,7 @@ def dataset(pid: str, env: str=None, raw: str=None):
         with open(file_path, 'w') as fp:
             fp.write(j)
 
-    if raw in ('t', 'T', 'true', 'True'):
+    if raw in ('t', 'T', 'true', 'True', 'TRUE'):
         response = j
     else:
         response = f'{open_tag}{j}{close_tag}'
