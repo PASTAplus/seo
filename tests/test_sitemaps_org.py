@@ -35,7 +35,7 @@ class TestSitemapsOrg(unittest.TestCase):
 
     def test_generate_sitemap(self):
         sitemap = sitemaps_org.generate_sitemap(env=Config.PASTA_P)
-        self.assertIsNotNone(sitemap)
+        self.assertIsInstance(sitemap, str)
 
     def test_get_count(self):
         count = sitemaps_org.get_count(env=Config.PASTA_P)
