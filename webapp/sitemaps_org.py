@@ -44,7 +44,8 @@ def generate_sitemap(pids: list, portal: str) -> str:
     return xml
 
 
-def generate_sitemap_bundle(env: str=None, page_size: int=Config.SITEMAP_PAGE_SIZE):
+def generate_sitemap_bundle(env: str = None,
+                            page_size: int = Config.SITEMAP_PAGE_SIZE):
     if env in ('d', 'dev', 'development'):
         pasta = Config.PASTA_D
         portal = Config.PORTAL_D
@@ -78,7 +79,7 @@ def generate_sitemap_bundle(env: str=None, page_size: int=Config.SITEMAP_PAGE_SI
             fp.write(sitemap)
 
     # Generate sitemap_index.xml
-    sitemap_index_xml = generate_sitemap_index(portal, pages)
+    sitemap_index_xml = generate_sitemap_index(portal.replace('/nis', ''), pages)
     with open(f'{cache}/sitemap_index.xml', 'w') as fp:
         fp.write(sitemap_index_xml)
 
