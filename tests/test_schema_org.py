@@ -32,8 +32,8 @@ class TestSchemaOrg(unittest.TestCase):
         pass
 
     def test_dataset(self):
-        json_ld = schema_org.dataset(pid='edi.1.1', env='p', raw='True')
-        print(json_ld)
+        json_ld = schema_org.dataset(pid='edi.3.1', env='p', raw='True')
+        print('\n' + json_ld)
         self.assertIsNotNone(json_ld)
 
 
