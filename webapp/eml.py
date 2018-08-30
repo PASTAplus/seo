@@ -38,6 +38,7 @@ class Eml(object):
         self._abstract = self._get_abstract()
         self._creator = self._get_creator_surname()
         self._geographic_coverage = self._get_geographic_coverage()
+        self._intellectual_rights = self._get_intellectual_rights()
         self._keywords = self._get_keywords()
         self._title = self._get_title()
 
@@ -70,6 +71,13 @@ class Eml(object):
             gc['south'] = clean(_.find('.//boundingCoordinates/southBoundingCoordinate').text)
         return gc
 
+    def _get_intellectual_rights(self):
+        ir = None
+        _ = self._root.find('.//dataset/intellectualRights')
+        if _ is not None:
+            ir = clean(_.xpath('string()'))
+        return ir
+
     def _get_keywords(self):
         keywords = None
         _ = self._root.findall('.//dataset/keywordSet/keyword')
@@ -97,6 +105,10 @@ class Eml(object):
     @property
     def geographic_coverage(self):
         return self._geographic_coverage
+
+    @property
+    def intellectual_rights(self):
+        return self._intellectual_rights
 
     @property
     def keywords(self):
