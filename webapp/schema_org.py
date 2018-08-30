@@ -14,6 +14,7 @@
 import json
 import os.path
 
+from lxml import etree
 import requests
 
 from webapp.config import Config
@@ -50,8 +51,8 @@ def dataset(pid: str, env: str=None, raw: str=None):
         scope, identifier, revision = utility.pid_triple(pid)
         pid_frag = f'{scope}/{identifier}/{revision}'
         eml_uri = f'{pasta}/metadata/eml/{pid_frag}'
-        doi_uri = f'{pasta}/doi/eml/{pid_frag}'
         portal_uri = f'{portal}/metadataviewer?packageid={pid}'
+        rmd_uri = f'{pasta}/rmd/eml/{scope}/{identifier}/{revision}'
 
         r = requests.get(eml_uri)
         if r.status_code == requests.codes.ok:
@@ -66,17 +67,29 @@ def dataset(pid: str, env: str=None, raw: str=None):
         json_ld['@type'] = "Dataset"
         json_ld['name'] = eml.title
         json_ld['url'] = portal_uri
+        json_ld['publisher'] = {
+            '@type': 'Organization',
+            '@id': Config.URL_EDI,
+            'name': 'Environmental Data Initiative',
+            'description': Config.DESCRIPTION_EDI,
+            'url': Config.URL_EDI,
+            'email': Config.EMAIL_EDI,
+            'funder': {
+                '@type': 'Organization',
+                'name': 'U.S. National Science Foundation'
+            }
+        }
 
         if eml.abstract is not None:
             json_ld['description'] = eml.abstract
         else:
-            json_ld['description'] = eml.name
+            json_ld['description'] = eml.title
 
         if eml.creator is not None:
-            json_ld['creator'] = {
-                '@type': 'Person',
-                'name': eml.creator
-            }
+            creators = list()
+            for creator in eml.creator:
+                creators.append({'@type': 'Person', 'familyName': creator})
+            json_ld['creator'] = creators
 
         if eml.geographic_coverage is not None:
             west = eml.geographic_coverage['west']
@@ -98,20 +111,25 @@ def dataset(pid: str, env: str=None, raw: str=None):
             '@id': Config.URL_EDI,
             'name': 'Environmental Data Initiative',
             'description': Config.DESCRIPTION_EDI,
-            'url': portal
+            'url': portal,
+            'funder': {
+                '@type': 'Organization',
+                'name': 'U.S. National Science Foundation'
+            }
         }
-
-        r = requests.get(doi_uri)
-        if r.status_code == requests.codes.ok:
-            doi = r.text
-            json_ld['identifier'] = ''.join(doi.split())
 
         if eml.keywords is not None:
             json_ld['keywords'] = eml.keywords
 
+        date_published, doi = get_resource_metadata(rmd_uri)
+        if date_published is not None:
+            json_ld['datePublished'] = date_published
+        if doi is not None:
+            json_ld['identifier'] = doi
+
         j = json.dumps(json_ld, indent=2)
-        with open(file_path, 'w') as fp:
-            fp.write(j)
+        # with open(file_path, 'w') as fp:
+        #     fp.write(j)
 
     if raw in ('t', 'T', 'true', 'True', 'TRUE'):
         response = j
@@ -119,6 +137,18 @@ def dataset(pid: str, env: str=None, raw: str=None):
         response = f'{open_tag}{j}{close_tag}'
 
     return response
+
+
+def get_resource_metadata(rmd_uri: str):
+    upload_date = None
+    doi = None
+    r = requests.get(rmd_uri)
+    if r.status_code == requests.codes.ok:
+        rmd = etree.fromstring(r.text.encode('utf-8'))
+        date_created = rmd.find('.//dateCreated').text
+        upload_date = date_created.split(' ')[0]
+        doi = rmd.find('.//doi').text
+    return upload_date, doi
 
 
 def main():
