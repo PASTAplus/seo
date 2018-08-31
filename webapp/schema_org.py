@@ -74,10 +74,6 @@ def dataset(pid: str, env: str=None, raw: str=None):
             'description': Config.DESCRIPTION_EDI,
             'url': Config.URL_EDI,
             'email': Config.EMAIL_EDI,
-            'funder': {
-                '@type': 'Organization',
-                'name': 'U.S. National Science Foundation'
-            }
         }
 
         if eml.abstract is not None:
@@ -90,6 +86,12 @@ def dataset(pid: str, env: str=None, raw: str=None):
             for creator in eml.creator:
                 creators.append({'@type': 'Person', 'familyName': creator})
             json_ld['creator'] = creators
+
+        if eml.funding is not None:
+            json_ld['funding'] = {
+                '@type': 'Organization',
+                'name': eml.funding
+            }
 
         if eml.geographic_coverage is not None:
             west = eml.geographic_coverage['west']
@@ -128,8 +130,8 @@ def dataset(pid: str, env: str=None, raw: str=None):
             json_ld['identifier'] = doi
 
         j = json.dumps(json_ld, indent=2)
-        # with open(file_path, 'w') as fp:
-        #     fp.write(j)
+        with open(file_path, 'w') as fp:
+            fp.write(j)
 
     if raw in ('t', 'T', 'true', 'True', 'TRUE'):
         response = j
