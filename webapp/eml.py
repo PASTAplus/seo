@@ -37,6 +37,7 @@ class Eml(object):
         self._root = etree.fromstring(self._eml)
         self._abstract = self._get_abstract()
         self._creator = self._get_creator_surname()
+        self._funding = self._get_funding()
         self._geographic_coverage = self._get_geographic_coverage()
         self._intellectual_rights = self._get_intellectual_rights()
         self._keywords = self._get_keywords()
@@ -58,6 +59,12 @@ class Eml(object):
                 creator.append(clean(surname.text))
         return creator
 
+    def _get_funding(self):
+        funding = None
+        _ = self._root.find('.//dataset/project/funding')
+        if _ is not None:
+            funding = clean(_.xpath('string()'))
+        return funding
 
     def _get_geographic_coverage(self):
         gc = None
@@ -101,6 +108,10 @@ class Eml(object):
     @property
     def creator(self):
         return self._creator
+
+    @property
+    def funding(self):
+        return self._funding
 
     @property
     def geographic_coverage(self):
