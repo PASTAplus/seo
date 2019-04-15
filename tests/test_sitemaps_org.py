@@ -34,11 +34,13 @@ class TestSitemapsOrg(unittest.TestCase):
         pass
 
     def test_generate_sitemap(self):
-        sitemap = sitemaps_org.generate_sitemap(env=Config.PASTA_P)
+        pids = ['knb-lter-nin.1.1']
+        portal = Config.PORTAL_P
+        sitemap = sitemaps_org.generate_sitemap(pids=pids, portal=portal)
         self.assertIsInstance(sitemap, str)
 
     def test_get_count(self):
-        count = sitemaps_org.get_count(env=Config.PASTA_P)
+        count = sitemaps_org.get_count(pasta=Config.PASTA_P)
         self.assertGreater(count, 0)
 
     def test_get_pids(self):
