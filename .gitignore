@@ -109,4 +109,4 @@ venv.bak/
 # Project files
 config.py
 cache
-/.project
+.project
