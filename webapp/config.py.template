@@ -41,12 +41,13 @@ class Config(object):
 
     URL_EDI = 'https://environmentaldatainitiative.org'
     EMAIL_EDI = 'info@environmentaldatainitiative.org'
+    LOGO_EDI = 'https://raw.githubusercontent.com/EDIorg/EDI-miscellaneous/main/logos/EDI-logo-312x307.png'
 
     # PASTA Data Package Manager Server Addresses
     WHITE_LIST = {
         '129.24.124.76': PASTA_D,
-        '129.24.124.169': PASTA_S,
-        '129.24.124.31': PASTA_P,
+        '129.24.240.153': PASTA_S,
+        '129.24.240.146': PASTA_P,
         '127.0.0.1': PASTA_P,
         }
 

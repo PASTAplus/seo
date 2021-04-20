@@ -66,12 +66,13 @@ def dataset(pid: str, env: str = None, raw: str = None):
         json_ld["name"] = eml.title
         json_ld["url"] = portal_uri
         json_ld["publisher"] = {
-            "@type": "Organization",
+            "@type": ["Service", "ResearchProject"],
             "@id": Config.URL_EDI,
             "name": "Environmental Data Initiative",
             "description": Config.DESCRIPTION_EDI,
             "url": Config.URL_EDI,
             "email": Config.EMAIL_EDI,
+            "logo": Config.LOGO_EDI,
         }
 
         if eml.abstract is not None:
