@@ -13,7 +13,6 @@
 """
 import os
 import sys
-import unittest
 
 import daiquiri
 
@@ -23,19 +22,13 @@ sys.path.insert(0, os.path.abspath('../src'))
 logger = daiquiri.getLogger('test_schema_org: ' + __name__)
 
 
-class TestSchemaOrg(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_dataset(self):
-        json_ld = schema_org.dataset(pid='edi.3.1', env='p', raw='True')
-        print('\n' + json_ld)
-        self.assertIsNotNone(json_ld)
+def test_dataset():
+    json_ld = schema_org.dataset(pid='edi.3.1', env='p', raw='True')
+    print('\n' + json_ld)
+    assert json_ld is not None
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_repository():
+    json_ld = schema_org.repository(raw='True')
+    print('\n' + json_ld)
+    assert json_ld is not None
