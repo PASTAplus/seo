@@ -66,7 +66,7 @@ def dataset(pid: str, env: str = None, raw: str = None):
         json_ld["name"] = eml.title
         json_ld["url"] = portal_uri
         json_ld["publisher"] = {
-            "@type": ["Service", "ResearchProject"],
+            "@type": "Organization",
             "@id": Config.URL_EDI,
             "name": "Environmental Data Initiative",
             "description": Config.DESCRIPTION_EDI,
@@ -76,7 +76,7 @@ def dataset(pid: str, env: str = None, raw: str = None):
         }
 
         if eml.abstract is not None:
-            json_ld["description"] = eml.abstract
+            json_ld["description"] = eml.abstract[:5000]
         else:
             json_ld["description"] = eml.title
 
