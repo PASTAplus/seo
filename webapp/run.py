@@ -35,9 +35,19 @@ def dataset():
     pid = request.args.get('pid')
     env = request.args.get('env')
     raw = request.args.get('raw')
-
     try:
         response = schema_org.dataset(pid=pid, env=env, raw=raw)
+        return response
+    except requests.exceptions.ConnectionError as e:
+        logger.error(e)
+        abort(400)
+
+
+@app.route('/seo/schema/repository')
+def repository():
+    raw = request.args.get('raw')
+    try:
+        response = schema_org.repository(raw=raw)
         return response
     except requests.exceptions.ConnectionError as e:
         logger.error(e)

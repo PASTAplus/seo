@@ -110,6 +110,7 @@ def dataset(pid: str, env: str = None, raw: str = None):
             "name": "Environmental Data Initiative",
             "description": Config.DESCRIPTION_EDI,
             "url": portal,
+            "logo": Config.LOGO_EDI,
             "funder": {
                 "@type": "Organization",
                 "name": "U.S. National Science Foundation",
@@ -149,9 +150,45 @@ def get_resource_metadata(rmd_uri: str):
     return upload_date, doi
 
 
-def main():
-    return 0
+def repository(raw: str = None) -> str:
+    json_ld = dict()
+    json_ld["@context"] = {"@vocab": "https://schema.org/"}
+    json_ld["@type"] = ["Service", "Organization", "ResearchProject"]
+    json_ld["@id"] = Config.URL_EDI
+    json_ld["identifier"] = [
+        {
+            "@type": "PropertyValue",
+            "name": "Re3data DOI: 10.17616/R3D60K",
+            "propertyID": "https://registry.identifiers.org/registry/doi",
+            "value": "doi:10.17616/R3D60K",
+            "url": "https://doi.org/10.17616/R3D60K"
+        },
+        {
+            "@type": "PropertyValue",
+            "name": "FAIRsharing.org DOI: 10.25504/fairsharing.xd3wmy",
+            "propertyID": "https://registry.identifiers.org/registry/doi",
+            "value": "doi:10.25504/fairsharing.xd3wmy",
+            "url": "https://doi.org/10.25504/fairsharing.xd3wmy"
+        },
+    ]
+    json_ld["name"] = "EDI"
+    json_ld["legalName"] = "Environmental Data Initiative"
+    json_ld["description"] = Config.DESCRIPTION_EDI
+    json_ld["url"] = Config.URL_EDI
+    json_ld["email"] = Config.EMAIL_EDI
+    json_ld["logo"] = Config.LOGO_EDI
+    json_ld["funder"] = {"@type": "Organization", "name": "U.S. National Science Foundation"}
+    json_ld["sameAs"] = [
+        "https://doi.org/10.17616/R3D60K",
+        "https://www.re3data.org/repository/r3d100010272",
+        "https://isni.org/isni/0000000495505609",
+        "urn:node:EDI"
+    ]
 
+    j = json.dumps(json_ld, indent=2)
+    if raw in ("t", "T", "true", "True", "TRUE"):
+        response = j
+    else:
+        response = f"{open_tag}{j}{close_tag}"
 
-if __name__ == "__main__":
-    main()
+    return response
