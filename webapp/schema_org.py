@@ -123,8 +123,15 @@ def dataset(pid: str, env: str = None, raw: str = None):
         date_published, doi = get_resource_metadata(rmd_uri)
         if date_published is not None:
             json_ld["datePublished"] = date_published
+
         if doi is not None:
-            json_ld["identifier"] = doi
+            json_ld["identifier"] = {
+                "@id": f"https://doi.org/{doi[4:]}",
+                "@type": "PropertyValue",
+                "propertyID": "https://registry.identifiers.org/registry/doi",
+                "value": doi,
+                "url": f"https://doi.org/{doi[4:]}"
+            }
 
         j = json.dumps(json_ld, indent=2)
         with open(file_path, "w") as fp:
