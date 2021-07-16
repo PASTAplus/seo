@@ -177,6 +177,13 @@ def repository(raw: str = None) -> str:
             "value": "doi:10.25504/fairsharing.xd3wmy",
             "url": "https://doi.org/10.25504/fairsharing.xd3wmy"
         },
+        {
+            "@type": "PropertyValue",
+            "name": "Global Research Identifier Database: grid.511300.6",
+            "propertyID": "https://registry.identifiers.org/registry/grid",
+            "value": "grid.511300.6",
+            "url": "https://www.grid.ac/institutes/grid.511300.6"
+        },
     ]
     json_ld["name"] = "EDI"
     json_ld["legalName"] = "Environmental Data Initiative"
