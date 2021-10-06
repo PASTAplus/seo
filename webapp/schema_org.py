@@ -184,6 +184,13 @@ def repository(raw: str = None) -> str:
             "value": "grid.511300.6",
             "url": "https://www.grid.ac/institutes/grid.511300.6"
         },
+        {
+            "@type": "PropertyValue",
+            "name": "Research Organization Registry; ror.org/0330j0z60",
+            "propertyID": "https://ror.org",
+            "value": "ror.org/0330j0z60",
+            "url": "https://ror.org/0330j0z60"
+        },
     ]
     json_ld["name"] = "EDI"
     json_ld["legalName"] = "Environmental Data Initiative"
