@@ -186,7 +186,7 @@ def repository(raw: str = None) -> str:
         },
         {
             "@type": "PropertyValue",
-            "name": "Research Organization Registry; ror.org/0330j0z60",
+            "name": "Research Organization Registry: ror.org/0330j0z60",
             "propertyID": "https://ror.org",
             "value": "ror.org/0330j0z60",
             "url": "https://ror.org/0330j0z60"
