@@ -39,8 +39,8 @@ class Config(object):
         ' Stations (OBFS), MacroSystems Biology (MSB), and Long Term' + \
         ' Ecological Research (LTER).'
 
-    URL_EDI = 'https://environmentaldatainitiative.org'
-    EMAIL_EDI = 'info@environmentaldatainitiative.org'
+    URL_EDI = 'https://edirepository.org'
+    EMAIL_EDI = 'info@edirepository.org'
     LOGO_EDI = 'https://raw.githubusercontent.com/EDIorg/EDI-miscellaneous/main/logos/EDI-logo-312x307.png'
 
     # PASTA Data Package Manager Server Addresses
