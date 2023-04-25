@@ -4,12 +4,12 @@ channels:
   - defaults
 dependencies:
   - flask
+  - libiconv
+  - lxml
   - daiquiri
   - requests
-  - libiconv
-  - python=3.8
-  - uwsgi
+  - python=3.11
   - jinja2
-  - lxml
+  - uwsgi
   - pytest
 prefix: /home/servilla/anaconda3/envs/seo
