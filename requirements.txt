@@ -23,7 +23,7 @@ python-json-logger==2.0.7
 requests==2.31.0
 setuptools==68.1.2
 tomli==2.0.1
-urllib3==2.0.4
+urllib3==2.0.7
 uWSGI==2.0.21
 Werkzeug==2.3.7
 wheel==0.41.2
