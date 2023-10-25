@@ -25,6 +25,6 @@ setuptools==68.1.2
 tomli==2.0.1
 urllib3==2.0.4
 uWSGI==2.0.21
-Werkzeug==2.3.7
+Werkzeug==3.0.1
 wheel==0.41.2
 zipp==3.16.2
