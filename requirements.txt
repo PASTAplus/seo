@@ -7,7 +7,7 @@ colorama==0.4.6
 daiquiri==3.0.0
 exceptiongroup==1.2.0
 Flask==3.0.2
-idna==3.6
+idna==3.7
 importlib-metadata==7.0.1
 iniconfig==2.0.0
 itsdangerous==2.1.2
