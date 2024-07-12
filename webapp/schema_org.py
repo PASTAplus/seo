@@ -13,12 +13,18 @@
 """
 import json
 import os.path
+import tempfile
 
 from lxml import etree
 import requests
+from soso.main import convert
+from soso.strategies.eml import EML
+from soso.strategies.eml import get_encoding_format
+from soso.utilities import delete_null_values, generate_citation_from_doi
+
+from webapp.utility import pid_triple
 
 from webapp.config import Config
-from webapp.eml import Eml
 import webapp.utility as utility
 
 open_tag = '<script type="application/ld+json">\n'
@@ -49,90 +55,37 @@ def dataset(pid: str, env: str = None, raw: str = None):
         scope, identifier, revision = utility.pid_triple(pid)
         pid_frag = f"{scope}/{identifier}/{revision}"
         eml_uri = f"{pasta}/metadata/eml/{pid_frag}"
-        portal_uri = f"{portal}/metadataviewer?packageid={pid}"
-        rmd_uri = f"{pasta}/rmd/eml/{scope}/{identifier}/{revision}"
+        doi_uri = f"{pasta}/doi/eml/{scope}/{identifier}/{revision}"
 
+        # Get EML for the convert function
         r = requests.get(eml_uri)
         if r.status_code == requests.codes.ok:
             eml = r.text
         else:
             raise requests.exceptions.ConnectionError()
 
-        eml = Eml(eml=eml)
-
-        json_ld = dict()
-        json_ld["@context"] = "http://schema.org"
-        json_ld["@type"] = "Dataset"
-        json_ld["name"] = eml.title
-        json_ld["url"] = portal_uri
-        json_ld["publisher"] = {
-            "@type": "Organization",
-            "@id": Config.URL_EDI,
-            "name": "Environmental Data Initiative",
-            "description": Config.DESCRIPTION_EDI,
-            "url": Config.URL_EDI,
-            "email": Config.EMAIL_EDI,
-            "logo": Config.LOGO_EDI,
-        }
-
-        if eml.abstract is not None:
-            json_ld["description"] = eml.abstract[:5000]
+        # Get DOI for the convert function
+        doi = requests.get(doi_uri)
+        if doi.status_code == requests.codes.ok:
+            doi = doi.text
+            doi = "https://doi.org/" + doi.split(":")[1]  # URL format
         else:
-            json_ld["description"] = eml.title
+            raise requests.exceptions.ConnectionError()
 
-        if eml.creator is not None:
-            creators = list()
-            for creator in eml.creator:
-                creators.append({"@type": "Person", "familyName": creator})
-            json_ld["creator"] = creators
+        # Convert EML to Schema.org JSON-LD - Note, a file path is required
+        # for the convert function
+        with tempfile.TemporaryDirectory() as tmpdir:
+            filename = tmpdir + "/" + pid + ".xml"
+            with open(filename, "w") as f:
+                f.write(eml)
+            json_ld = convert_eml_to_schema_org(
+                file_path=filename,
+                pid=pid,
+                doi=doi
+            )
 
-        if eml.funding is not None:
-            json_ld["funding"] = {"@type": "Organization", "name": eml.funding}
-
-        if eml.geographic_coverage is not None:
-            west = eml.geographic_coverage["west"]
-            east = eml.geographic_coverage["east"]
-            north = eml.geographic_coverage["north"]
-            south = eml.geographic_coverage["south"]
-
-            json_ld["spatialCoverage"] = {
-                "@type": "Place",
-                "geo": {
-                    "@type": "GeoShape",
-                    "description": eml.geographic_coverage["description"],
-                    "box": f"{south} {east} {north} {west}",
-                },
-            }
-
-        json_ld["includedInDataCatalog"] = {
-            "@type": "DataCatalog",
-            "@id": Config.URL_EDI,
-            "name": "Environmental Data Initiative",
-            "description": Config.DESCRIPTION_EDI,
-            "url": portal,
-            "logo": Config.LOGO_EDI,
-            "funder": {
-                "@type": "Organization",
-                "name": "U.S. National Science Foundation",
-            },
-        }
-
-        if eml.keywords is not None:
-            json_ld["keywords"] = eml.keywords
-
-        date_published, doi = get_resource_metadata(rmd_uri)
-        if date_published is not None:
-            json_ld["datePublished"] = date_published
-
-        if doi is not None:
-            json_ld["identifier"] = {
-                "@id": f"https://doi.org/{doi[4:]}",
-                "@type": "PropertyValue",
-                "propertyID": "https://registry.identifiers.org/registry/doi",
-                "value": doi,
-                "url": f"https://doi.org/{doi[4:]}"
-            }
-
+        # Reformat the JSON-LD for readability and write to cache
+        json_ld = json.loads(json_ld)
         j = json.dumps(json_ld, indent=2)
         with open(file_path, "w") as fp:
             fp.write(j)
@@ -145,16 +98,72 @@ def dataset(pid: str, env: str = None, raw: str = None):
     return response
 
 
-def get_resource_metadata(rmd_uri: str):
-    upload_date = None
-    doi = None
-    r = requests.get(rmd_uri)
-    if r.status_code == requests.codes.ok:
-        rmd = etree.fromstring(r.text.encode("utf-8"))
-        date_created = rmd.find(".//dateCreated").text
-        upload_date = date_created.split(" ")[0]
-        doi = rmd.find(".//doi").text
-    return upload_date, doi
+def convert_eml_to_schema_org(file_path: str, pid: str, doi: str) -> str:
+    """Convert EML to Schema.org JSON-LD
+
+    :param file_path: Path to the data package metadata file.
+    :param pid: Data package identifier (scope.identifier.revision).
+    :param doi: Data package Digital Object Identifier. Must be URL
+        prefixed.
+    """
+
+    # Add properties that can't be derived from the EML record
+    scope, identifier, revision = pid_triple(pid)
+    url = ("https://portal.edirepository.org/nis/mapbrowse?scope=" + scope +
+           "&identifier=" + identifier + "&revision=" + revision)
+    is_accessible_for_free = True
+    citation = generate_citation_from_doi(doi, style="apa", locale="en-US")
+    provider = {"@id": "https://edirepository.org"}
+    publisher = {"@id": "https://edirepository.org"}
+    identifier = {  # DOI is more informative than the packageId
+        "@id": doi,
+        "@type": "PropertyValue",
+        "propertyID": "https://registry.identifiers.org/registry/doi",
+        "value": doi.split("https://doi.org/")[1],
+        "url": doi
+    }
+
+    # Modify the get_subject_of method to add the missing contentUrl
+    def get_subject_of(self):
+        encoding_format = get_encoding_format(self.metadata)
+        date_modified = self.get_date_modified()
+        if encoding_format and date_modified:
+            file_name = self.file.split("/")[-1]
+            subject_of = {
+                "@type": "DataDownload",
+                "name": "EML metadata for dataset",
+                "description": "EML metadata describing the dataset",
+                "encodingFormat": encoding_format,
+                "contentUrl": (
+                        "https://pasta.lternet.edu/package/metadata/eml/" +
+                        file_name.split(".")[0] + "/" +
+                        file_name.split(".")[1] + "/" +
+                        file_name.split(".")[2]),
+                "dateModified": date_modified,
+            }
+            return delete_null_values(subject_of)
+        return None
+
+    # Override the get_subject_of method of the EML strategy
+    EML.get_subject_of = get_subject_of
+
+    # Call the convert function with the additional properties
+    additional_properties = {
+        "url": url,
+        "version": revision,
+        "isAccessibleForFree": is_accessible_for_free,
+        "citation": citation,
+        "provider": provider,
+        "publisher": publisher,
+        "identifier": identifier
+    }
+    res = convert(
+        file=file_path,
+        strategy="EML",
+        **additional_properties
+    )
+
+    return res
 
 
 def repository(raw: str = None) -> str:
