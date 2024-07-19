@@ -6,7 +6,7 @@ charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
 daiquiri==3.0.0
-exceptiongroup==1.2.0
+exceptiongroup==1.2.2
 Flask==3.0.3
 h2==4.1.0
 hpack==4.0.0
@@ -18,23 +18,22 @@ iniconfig==2.0.0
 isodate==0.6.1
 itsdangerous==2.2.0
 Jinja2==3.1.4
-lxml==4.9.4
+lxml==5.2.2
 MarkupSafe==2.1.5
-numpy==1.26.4
 owlrl==6.0.2
 packaging==24.1
 pip==24.0
 pluggy==1.5.0
-prettytable==2.5.0
+prettytable==3.10.2
 pycparser==2.22
 pyparsing==3.1.2
-pyshacl==0.23.0
+pyshacl==0.26.0
 PySocks==1.7.1
 pytest==8.2.2
 python-json-logger==2.0.7
-rdflib==6.3.2
+rdflib==7.0.0
 requests==2.32.3
-setuptools==70.2.0
+setuptools==71.0.1
 six==1.16.0
 soso @ git+https://github.com/clnsmth/soso.git@development
 tomli==2.0.1
@@ -45,4 +44,4 @@ webencodings==0.5.1
 Werkzeug==3.0.3
 wheel==0.43.0
 zipp==3.19.2
-zstandard==0.22.0
+zstandard==0.23.0
