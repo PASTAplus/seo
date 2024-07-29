@@ -8,6 +8,7 @@ dependencies:
   - jinja2
   - libiconv
   - lxml
+  - pip
   - pytest
   - python=3.12
   - requests
