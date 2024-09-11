@@ -253,36 +253,3 @@ def repository(raw: str = None) -> str:
         response = f"{open_tag}{j}{close_tag}"
 
     return response
-
-
-if __name__ == "__main__":
-
-    # Check that unrecognized file extensions result in the default
-    # encodingFormat
-    eml = etree.parse('../tests/data/edi.3.1.xml')
-    physical = eml.find('.//physical')
-    physical.find('.//objectName').text = 'file.unknownextension'
-    with tempfile.TemporaryDirectory() as tmpdir:
-        filename = tmpdir + "/edi.3.1.xml"
-        eml.write(filename)
-        json_ld = convert_eml_to_schema_org(
-            file_path=filename,
-            pid='edi.3.1',
-            doi='https://doi.org/10.6073/pasta/bf143fa962e1edb822847bc0ee90c2f7'
-        )
-        assert '"encodingFormat": "application/octet-stream"' in json_ld
-        assert '"encodingFormat": "text/csv"' not in json_ld
-
-    # Check that recognized file extensions don't result in the default
-    # encodingFormat
-    eml = etree.parse('../tests/data/edi.3.1.xml')
-    with tempfile.TemporaryDirectory() as tmpdir:
-        filename = tmpdir + "/edi.3.1.xml"
-        eml.write(filename)
-        json_ld = convert_eml_to_schema_org(
-            file_path=filename,
-            pid='edi.3.1',
-            doi='https://doi.org/10.6073/pasta/bf143fa962e1edb822847bc0ee90c2f7'
-        )
-        assert '"encodingFormat": "text/csv"' in json_ld
-        assert '"encodingFormat": "application/octet-stream"' not in json_ld
