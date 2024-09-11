@@ -18,7 +18,8 @@ import tempfile
 from lxml import etree
 import requests
 from soso.main import convert
-from soso.strategies.eml import EML
+from soso.strategies.eml import (EML, get_content_size, get_content_url,
+                                 get_data_entity_encoding_format, get_checksum)
 from soso.strategies.eml import get_encoding_format
 from soso.utilities import delete_null_values, generate_citation_from_doi
 
@@ -143,9 +144,39 @@ def convert_eml_to_schema_org(file_path: str, pid: str, doi: str) -> str:
             }
             return delete_null_values(subject_of)
         return None
-
     # Override the get_subject_of method of the EML strategy
     EML.get_subject_of = get_subject_of
+
+    # Modify the get_distribution method to set a default encodingFormat when
+    # it is missing
+    def get_distribution(self):
+        distribution = []
+        data_entities = [
+            "dataTable",
+            "spatialRaster",
+            "spatialVector",
+            "storedProcedure",
+            "view",
+            "otherEntity",
+        ]
+        for data_entity in data_entities:
+            for item in self.metadata.xpath(f".//{data_entity}"):
+                encoding_format = get_data_entity_encoding_format(item)
+                if encoding_format is None:  # Default encodingFormat when missing
+                    encoding_format = "application/octet-stream"
+                data_download = {
+                    "@type": "DataDownload",
+                    "name": item.findtext(".//entityName"),
+                    "description": item.findtext(".//entityDescription"),
+                    "contentSize": get_content_size(item),
+                    "contentUrl": get_content_url(item),
+                    "encodingFormat": encoding_format,
+                    "spdx:checksum": get_checksum(item),
+                }
+                distribution.append(data_download)
+        return delete_null_values(distribution)
+    # Override the get_distribution method of the EML strategy
+    EML.get_distribution = get_distribution
 
     # Call the convert function with the additional properties
     additional_properties = {
@@ -222,3 +253,36 @@ def repository(raw: str = None) -> str:
         response = f"{open_tag}{j}{close_tag}"
 
     return response
+
+
+if __name__ == "__main__":
+
+    # Check that unrecognized file extensions result in the default
+    # encodingFormat
+    eml = etree.parse('../tests/data/edi.3.1.xml')
+    physical = eml.find('.//physical')
+    physical.find('.//objectName').text = 'file.unknownextension'
+    with tempfile.TemporaryDirectory() as tmpdir:
+        filename = tmpdir + "/edi.3.1.xml"
+        eml.write(filename)
+        json_ld = convert_eml_to_schema_org(
+            file_path=filename,
+            pid='edi.3.1',
+            doi='https://doi.org/10.6073/pasta/bf143fa962e1edb822847bc0ee90c2f7'
+        )
+        assert '"encodingFormat": "application/octet-stream"' in json_ld
+        assert '"encodingFormat": "text/csv"' not in json_ld
+
+    # Check that recognized file extensions don't result in the default
+    # encodingFormat
+    eml = etree.parse('../tests/data/edi.3.1.xml')
+    with tempfile.TemporaryDirectory() as tmpdir:
+        filename = tmpdir + "/edi.3.1.xml"
+        eml.write(filename)
+        json_ld = convert_eml_to_schema_org(
+            file_path=filename,
+            pid='edi.3.1',
+            doi='https://doi.org/10.6073/pasta/bf143fa962e1edb822847bc0ee90c2f7'
+        )
+        assert '"encodingFormat": "text/csv"' in json_ld
+        assert '"encodingFormat": "application/octet-stream"' not in json_ld

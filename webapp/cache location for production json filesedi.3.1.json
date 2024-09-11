@@ -198,6 +198,19 @@
       }
     ]
   },
+  "contributor": {
+    "@list": [
+      {
+        "@type": "Role",
+        "roleName": "contact",
+        "contributor": {
+          "@type": "Person",
+          "givenName": "Robert",
+          "familyName": "Miller"
+        }
+      }
+    ]
+  },
   "provider": {
     "@id": "https://edirepository.org"
   },
