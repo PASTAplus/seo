@@ -52,7 +52,9 @@ def test_default_encoding_format():
         json_ld = convert_eml_to_schema_org(
             file_path=filename,
             pid='edi.3.1',
-            doi='https://doi.org/10.6073/pasta/bf143fa962e1edb822847bc0ee90c2f7'
+            doi='https://doi.org/10.6073/pasta/bf143fa962e1edb822847bc0ee90c2f7',
+            pasta='https://pasta.lternet.edu/package',
+            portal='https://portal.edirepository.org/nis',
         )
         assert '"encodingFormat": "application/octet-stream"' in json_ld
         assert '"encodingFormat": "text/csv"' not in json_ld
@@ -66,7 +68,33 @@ def test_default_encoding_format():
         json_ld = convert_eml_to_schema_org(
             file_path=filename,
             pid='edi.3.1',
-            doi='https://doi.org/10.6073/pasta/bf143fa962e1edb822847bc0ee90c2f7'
+            doi='https://doi.org/10.6073/pasta/bf143fa962e1edb822847bc0ee90c2f7',
+            pasta='https://pasta.lternet.edu/package',
+            portal='https://portal.edirepository.org/nis',
         )
         assert '"encodingFormat": "text/csv"' in json_ld
         assert '"encodingFormat": "application/octet-stream"' not in json_ld
+
+
+def test_convert_eml_to_schema_org_uses_correct_environment():
+    """Test that the convert_eml_to_schema_org function results in URIs
+    pointing to the correct PASTA and portal environments"""
+    env = ["", "-s", "-d"]
+    for e in env:
+        pasta = f"https://pasta{e}.lternet.edu/package"
+        portal = f"https://portal{e}.edirepository.org/nis"
+        if e == "":  # only production has valid DOIs
+            doi = "https://doi.org/10.6073/pasta/bf143fa962e1edb822847bc0ee90c2f7"
+        else:
+            doi = "https://doi.org/DOI_PLACE_HOLDER"
+        json_ld = convert_eml_to_schema_org(
+            file_path='tests/data/edi.3.1.xml',
+            pid='edi.3.1',
+            doi=doi,
+            pasta=pasta,
+            portal=portal,
+        )
+        assert pasta in json_ld
+        assert portal in json_ld
+
+

@@ -15,7 +15,6 @@ import json
 import os.path
 import tempfile
 
-from lxml import etree
 import requests
 from soso.main import convert
 from soso.strategies.eml import (EML, get_content_size, get_content_url,
@@ -99,47 +98,51 @@ def dataset(pid: str, env: str = None, raw: str = None):
     return response
 
 
-def convert_eml_to_schema_org(file_path: str, pid: str, doi: str) -> str:
+def convert_eml_to_schema_org(file_path: str, pid: str, doi: str, pasta: str,
+                              portal: str) -> str:
     """Convert EML to Schema.org JSON-LD
 
     :param file_path: Path to the data package metadata file.
     :param pid: Data package identifier (scope.identifier.revision).
     :param doi: Data package Digital Object Identifier. Must be URL
         prefixed.
+    :param pasta: PASTA base URI.
+    :param portal: Data portal base URI.
     """
 
     # Add properties that can't be derived from the EML record
     scope, identifier, revision = pid_triple(pid)
-    url = ("https://portal.edirepository.org/nis/mapbrowse?scope=" + scope +
-           "&identifier=" + identifier + "&revision=" + revision)
+    uri = (f"{portal}/mapbrowse?scope={scope}&identifier={identifier}&"
+           f"revision={revision}")
     is_accessible_for_free = True
     citation = generate_citation_from_doi(doi, style="apa", locale="en-US")
     provider = {"@id": "https://edirepository.org"}
     publisher = {"@id": "https://edirepository.org"}
-    identifier = {  # DOI is more informative than the packageId
-        "@id": doi,
-        "@type": "PropertyValue",
-        "propertyID": "https://registry.identifiers.org/registry/doi",
-        "value": doi.split("https://doi.org/")[1],
-        "url": doi
-    }
+    if doi is not None:  # development and staging environments don't have DOIs
+        identifier = {  # DOI is more informative than the packageId
+            "@id": doi,
+            "@type": "PropertyValue",
+            "propertyID": "https://registry.identifiers.org/registry/doi",
+            "value": doi.split("https://doi.org/")[1],
+            "url": doi
+        }
+    else:
+        identifier = None
 
     # Modify the get_subject_of method to add the missing contentUrl
     def get_subject_of(self):
+        scope, identifier, revision, _ = os.path.basename(self.file).split(".")
+        pasta = self.kwargs.get("pasta")
         encoding_format = get_encoding_format(self.metadata)
         date_modified = self.get_date_modified()
         if encoding_format and date_modified:
-            file_name = self.file.split("/")[-1]
             subject_of = {
                 "@type": "DataDownload",
                 "name": "EML metadata for dataset",
                 "description": "EML metadata describing the dataset",
                 "encodingFormat": encoding_format,
-                "contentUrl": (
-                        "https://pasta.lternet.edu/package/metadata/eml/" +
-                        file_name.split(".")[0] + "/" +
-                        file_name.split(".")[1] + "/" +
-                        file_name.split(".")[2]),
+                "contentUrl": f"{pasta}/metadata/eml/{scope}/{identifier}/"
+                              f"{revision}",
                 "dateModified": date_modified,
             }
             return delete_null_values(subject_of)
@@ -180,13 +183,14 @@ def convert_eml_to_schema_org(file_path: str, pid: str, doi: str) -> str:
 
     # Call the convert function with the additional properties
     additional_properties = {
-        "url": url,
+        "url": uri,
         "version": revision,
         "isAccessibleForFree": is_accessible_for_free,
         "citation": citation,
         "provider": provider,
         "publisher": publisher,
-        "identifier": identifier
+        "identifier": identifier,
+        "pasta": pasta,  # PASTA base URI for the subjectOf contentUrl
     }
     res = convert(
         file=file_path,
