@@ -20,7 +20,7 @@ import daiquiri
 from lxml import etree
 
 import webapp.schema_org as schema_org
-from webapp.schema_org import convert_eml_to_schema_org
+from webapp.schema_org import convert_eml_to_schema_org, generate_citation
 
 sys.path.insert(0, os.path.abspath('../src'))
 logger = daiquiri.getLogger('test_schema_org: ' + __name__)
@@ -97,4 +97,12 @@ def test_convert_eml_to_schema_org_uses_correct_environment():
         assert pasta in json_ld
         assert portal in json_ld
 
+
+def test_generate_citation():
+    """Test that the generate_citation function generates a citation"""
+    res = generate_citation(
+        pid="edi.3.1",
+        portal="https://portal.edirepository.org/nis"
+    )
+    assert res is not None
 
