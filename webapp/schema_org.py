@@ -383,7 +383,6 @@ def generate_citation(pid: str, portal: str) -> str:
         generated.
     :returns: The citation for the data package formatted to ESIP conventions.
     """
-    # Determine the environment based on the portal URL
     if "portal-d" in portal:
         env = "development"
     elif "portal-s" in portal:
