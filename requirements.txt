@@ -41,7 +41,7 @@ urllib3==2.2.2
 uWSGI==2.0.23
 wcwidth==0.2.13
 webencodings==0.5.1
-Werkzeug==3.0.3
+Werkzeug==3.0.6
 wheel==0.43.0
 zipp==3.19.2
 zstandard==0.23.0
