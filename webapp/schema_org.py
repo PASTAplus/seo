@@ -20,7 +20,6 @@ from mimetypes import guess_type
 import requests
 from lxml import etree
 from soso.main import convert
-from soso.utilities import generate_citation_from_doi
 
 from webapp.utility import pid_triple
 
@@ -177,10 +176,13 @@ def convert_eml_to_schema_org(file_path: str, pid: str, doi: str, pasta: str,
     uri = (f"{portal}/mapbrowse?scope={scope}&identifier={identifier}&"
            f"revision={revision}")
     is_accessible_for_free = True
-    citation = generate_citation_from_doi(doi, style="apa", locale="en-US")
     provider = {"@id": "https://edirepository.org"}
     publisher = {"@id": "https://edirepository.org"}
     identifier = get_identifier(doi)
+    try:
+        citation = generate_citation(pid, portal)
+    except requests.exceptions.ConnectionError:
+        citation = None
 
     # Create properties that are insufficiently defined by the soso package
     subject_of = get_subject_of(
@@ -372,3 +374,28 @@ def get_date_modified(metadata: etree.ElementTree) -> Union[str, None]:
     """
     date_modified = metadata.findtext(".//dataset/pubDate")
     return date_modified
+
+
+def generate_citation(pid: str, portal: str) -> str:
+    """
+    :param pid: Data package identifier (scope.identifier.revision).
+    :param portal: The portal base URL for which the citation will be
+        generated.
+    :returns: The citation for the data package formatted to ESIP conventions.
+    """
+    if "portal-d" in portal:
+        env = "development"
+    elif "portal-s" in portal:
+        env = "staging"
+    else:
+        env = "production"
+    url = f"https://cite.edirepository.org/cite/{pid}"
+    parameters = {"env": env, "style": "ESIP"}
+    if "knb-lter-and" in pid:  # some scopes want organizations ignored
+        parameters["ignore"] = "ORGANIZATIONS"
+    r = requests.get(url, params=parameters)
+    if r.status_code == requests.codes.ok:
+        citation = r.text
+    else:
+        raise requests.exceptions.ConnectionError()
+    return citation
