@@ -7,7 +7,7 @@ click==8.1.8
 colorama==0.4.6
 daiquiri==3.0.0
 exceptiongroup==1.2.2
-Flask==3.1.0
+Flask==3.1.1
 h2==4.2.0
 hpack==4.1.0
 html5lib==1.1
