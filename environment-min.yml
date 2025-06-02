@@ -15,5 +15,5 @@ dependencies:
   - uwsgi
   - pip
   - pip:
-      - git+https://github.com/clnsmth/soso.git@development
+      - git+https://github.com/clnsmth/soso.git@v0.4.0
 prefix: /opt/miniconda3/envs/seo
