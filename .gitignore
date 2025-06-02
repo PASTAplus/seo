@@ -110,3 +110,6 @@ venv.bak/
 config.py
 cache
 .project
+
+# Test files
+cache location for * json files*.json
