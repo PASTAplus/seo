@@ -38,7 +38,7 @@ six==1.17.0
 soso==0.4.0
 tomli==2.2.1
 typing_extensions==4.14.0
-urllib3==2.4.0
+urllib3==2.5.0
 uWSGI==2.0.30
 wcwidth==0.2.13
 webencodings==0.5.1
