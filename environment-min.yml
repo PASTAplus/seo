@@ -3,16 +3,13 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - lxml
+  - daiquiri
   - pip
-  - requests
   - python=3.12
   - uwsgi
-  - jinja2
-  - flask
   - pytest
-  - daiquiri
+  - jinja2
+  - requests
+  - flask
   - libiconv
-  - pip:
-      - git+https://github.com/clnsmth/soso.git@v0.4.0
 prefix: /opt/miniconda3/envs/seo
