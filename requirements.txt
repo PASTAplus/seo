@@ -29,7 +29,7 @@ Pygments==2.19.2
 pyparsing==3.2.5
 pyshacl==0.26.0
 PySocks==1.7.1
-pytest==8.4.2
+pytest==9.0.0
 python-json-logger==2.0.7
 rdflib==7.4.0
 requests==2.32.5
