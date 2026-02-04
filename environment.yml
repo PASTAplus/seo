@@ -3,6 +3,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - _libgcc_mutex=0.1
+  - _openmp_mutex=4.5
   - backports.zstd=1.3.0
   - blinker=1.9.0
   - brotli-python=1.2.0
@@ -23,14 +25,20 @@ dependencies:
   - importlib-metadata=8.7.0
   - iniconfig=2.3.0
   - itsdangerous=2.2.0
-  - jansson=2.14.1
+  - jansson=2.15.0
   - jinja2=3.1.6
-  - libcxx=21.1.8
+  - ld_impl_linux-64=2.45
   - libexpat=2.7.3
   - libffi=3.5.2
+  - libgcc=15.2.0
+  - libgcc-ng=15.2.0
+  - libgomp=15.2.0
   - libiconv=1.18
   - liblzma=5.8.2
+  - libnsl=2.0.1
   - libsqlite=3.51.2
+  - libstdcxx=15.2.0
+  - libuuid=2.41.3
   - libxcrypt=4.4.36
   - libxml2=2.15.1
   - libxml2-16=2.15.1
@@ -38,10 +46,10 @@ dependencies:
   - libzlib=1.3.1
   - markupsafe=3.0.3
   - ncurses=6.5
-  - openssl=3.6.0
+  - openssl=3.6.1
   - packaging=26.0
   - pcre2=10.47
-  - pip=25.3
+  - pip=26.0
   - pluggy=1.6.0
   - pygments=2.19.2
   - pysocks=1.7.1
@@ -51,7 +59,7 @@ dependencies:
   - python_abi=3.12
   - readline=8.3
   - requests=2.32.5
-  - setuptools=80.10.1
+  - setuptools=80.10.2
   - tk=8.6.13
   - tomli=2.4.0
   - typing_extensions=4.15.0
@@ -59,7 +67,7 @@ dependencies:
   - urllib3=2.6.3
   - uwsgi=2.0.31
   - werkzeug=3.1.5
-  - wheel=0.46.2
+  - wheel=0.46.3
   - yaml=0.2.5
   - zipp=3.23.0
   - zstd=1.5.7
@@ -73,6 +81,6 @@ dependencies:
       - rdflib==7.5.0
       - six==1.17.0
       - soso==0.4.0
-      - wcwidth==0.3.0
+      - wcwidth==0.5.3
       - webencodings==0.5.1
-prefix: /opt/miniconda3/envs/seo
+prefix: /home/servilla/miniconda3/envs/seo
