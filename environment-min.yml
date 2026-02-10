@@ -14,5 +14,5 @@ dependencies:
   - daiquiri
   - libiconv
   - pip:
-      - git+https://github.com/clnsmth/soso.git@v0.4.0
+      - soso
 prefix: /opt/miniconda3/envs/seo
