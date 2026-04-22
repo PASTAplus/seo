@@ -88,7 +88,10 @@ def dataset(pid: str, env: str = None, raw: str = None):
         # Convert EML to Schema.org JSON-LD - Note, a file path is required
         # for the convert function
         with tempfile.TemporaryDirectory() as tmpdir:
-            filename = tmpdir + "/" + pid + ".xml"
+            safe_tmpdir = os.path.realpath(tmpdir)
+            filename = os.path.realpath(os.path.join(safe_tmpdir, pid + ".xml"))
+            if os.path.commonpath([safe_tmpdir, filename]) != safe_tmpdir:
+                raise ValueError("Invalid metadata file path")
             with open(filename, "w") as f:
                 f.write(eml)
             json_ld = convert_eml_to_schema_org(
