@@ -212,7 +212,7 @@ def convert_eml_to_schema_org(file_path: str, pid: str, doi: str, pasta: str,
 
     # Create properties that are insufficiently defined by the soso package
     subject_of = get_subject_of(
-        file_path=file_path,
+        file_path=resolved_path,
         metadata=metadata,
         pasta=pasta
     )
@@ -232,7 +232,7 @@ def convert_eml_to_schema_org(file_path: str, pid: str, doi: str, pasta: str,
         "pasta": pasta,  # PASTA base URI for the subjectOf contentUrl
     }
     res = convert(
-        file=file_path,
+        file=resolved_path,
         strategy="EML",
         **additional_properties
     )
