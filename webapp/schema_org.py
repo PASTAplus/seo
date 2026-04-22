@@ -13,6 +13,7 @@
 """
 import json
 import os.path
+import re
 import tempfile
 from typing import Union
 from mimetypes import guess_type
@@ -30,7 +31,19 @@ open_tag = '<script type="application/ld+json">\n'
 close_tag = "\n</script>"
 
 
+def _validate_pid_for_path(pid: str) -> str:
+    """Validate PID before using it in filesystem paths."""
+    if pid is None:
+        raise ValueError("Missing pid")
+    if "/" in pid or "\\" in pid or ".." in pid:
+        raise ValueError("Invalid pid")
+    if not re.fullmatch(r"[A-Za-z0-9.-]+", pid):
+        raise ValueError("Invalid pid")
+    return pid
+
+
 def dataset(pid: str, env: str = None, raw: str = None):
+    pid = _validate_pid_for_path(pid)
     if env in ("d", "dev", "development"):
         pasta = Config.PASTA_D
         portal = Config.PORTAL_D
