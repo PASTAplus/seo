@@ -17,6 +17,7 @@ import re
 import tempfile
 from typing import Union
 from mimetypes import guess_type
+from urllib.parse import urlparse
 
 import requests
 from lxml import etree
@@ -362,8 +363,16 @@ def get_checksum(data_entity_element: etree._Element) -> Union[list, None]:
     """
     checksum = []
     for item in data_entity_element.xpath(".//physical/authentication"):
-        if item.get("method") is not None and "spdx.org" in item.get("method"):
-            algorithm = item.get("method").split("#")[-1]
+        method = item.get("method")
+        if method is None:
+            continue
+        parsed_method = urlparse(method)
+        if (
+            parsed_method.scheme in ("http", "https")
+            and parsed_method.hostname == "spdx.org"
+            and parsed_method.fragment
+        ):
+            algorithm = parsed_method.fragment
             res = {
                 "@type": "spdx:Checksum",
                 "spdx:checksumValue": item.text,
