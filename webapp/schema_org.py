@@ -13,13 +13,16 @@
 """
 import json
 import os.path
+import re
 import tempfile
 from typing import Union
 from mimetypes import guess_type
+from urllib.parse import urlparse
 
 import requests
 from lxml import etree
 from soso.main import convert
+from werkzeug.utils import secure_filename
 
 from webapp.utility import pid_triple
 
@@ -30,7 +33,19 @@ open_tag = '<script type="application/ld+json">\n'
 close_tag = "\n</script>"
 
 
+def _validate_pid_for_path(pid: str) -> str:
+    """Validate PID before using it in filesystem paths."""
+    if pid is None:
+        raise ValueError("Missing pid")
+    if "/" in pid or "\\" in pid or ".." in pid:
+        raise ValueError("Invalid pid")
+    if not re.fullmatch(r"[A-Za-z0-9.-]+", pid):
+        raise ValueError("Invalid pid")
+    return pid
+
+
 def dataset(pid: str, env: str = None, raw: str = None):
+    pid = _validate_pid_for_path(pid)
     if env in ("d", "dev", "development"):
         pasta = Config.PASTA_D
         portal = Config.PORTAL_D
@@ -74,7 +89,12 @@ def dataset(pid: str, env: str = None, raw: str = None):
         # Convert EML to Schema.org JSON-LD - Note, a file path is required
         # for the convert function
         with tempfile.TemporaryDirectory() as tmpdir:
-            filename = tmpdir + "/" + pid + ".xml"
+            safe_tmpdir = os.path.realpath(tmpdir)
+            expected_name = f"{pid}.xml"
+            safe_name = secure_filename(expected_name)
+            if not safe_name or safe_name != expected_name:
+                raise ValueError("Invalid metadata file name")
+            filename = utility.safe_child_path(safe_tmpdir, safe_name)
             with open(filename, "w") as f:
                 f.write(eml)
             json_ld = convert_eml_to_schema_org(
@@ -83,6 +103,7 @@ def dataset(pid: str, env: str = None, raw: str = None):
                 doi=doi,
                 pasta=pasta,
                 portal=portal,
+                allowed_base_dir=safe_tmpdir,
             )
 
         # Reformat the JSON-LD for readability and write to cache
@@ -158,7 +179,7 @@ def repository(raw: str = None) -> str:
 
 
 def convert_eml_to_schema_org(file_path: str, pid: str, doi: str, pasta: str,
-                              portal: str) -> str:
+                              portal: str, allowed_base_dir: str = None) -> str:
     """Convert EML to Schema.org JSON-LD
 
     :param file_path: Path to the data package metadata file.
@@ -167,9 +188,20 @@ def convert_eml_to_schema_org(file_path: str, pid: str, doi: str, pasta: str,
         prefixed.
     :param pasta: PASTA base URI.
     :param portal: Data portal base URI.
+    :param allowed_base_dir: Optional trusted directory that file_path must be
+        contained within.
     :returns: JSON-LD string.
     """
-    metadata = etree.parse(file_path)
+    if allowed_base_dir is not None:
+        resolved_path = utility.safe_child_path(allowed_base_dir, file_path)
+    else:
+        resolved_path = os.path.realpath(file_path)
+    if not os.path.isfile(resolved_path):
+        raise ValueError("Invalid metadata file path")
+    utility.validate_xml_filename(resolved_path)
+
+    secure_parser = utility.make_secure_xml_parser()
+    metadata = etree.parse(resolved_path, parser=secure_parser)
 
     # Create properties that can't be derived from the EML record
     scope, identifier, revision = pid_triple(pid)
@@ -186,7 +218,7 @@ def convert_eml_to_schema_org(file_path: str, pid: str, doi: str, pasta: str,
 
     # Create properties that are insufficiently defined by the soso package
     subject_of = get_subject_of(
-        file_path=file_path,
+        file_path=resolved_path,
         metadata=metadata,
         pasta=pasta
     )
@@ -206,7 +238,7 @@ def convert_eml_to_schema_org(file_path: str, pid: str, doi: str, pasta: str,
         "pasta": pasta,  # PASTA base URI for the subjectOf contentUrl
     }
     res = convert(
-        file=file_path,
+        file=resolved_path,
         strategy="EML",
         **additional_properties
     )
@@ -344,8 +376,16 @@ def get_checksum(data_entity_element: etree._Element) -> Union[list, None]:
     """
     checksum = []
     for item in data_entity_element.xpath(".//physical/authentication"):
-        if item.get("method") is not None and "spdx.org" in item.get("method"):
-            algorithm = item.get("method").split("#")[-1]
+        method = item.get("method")
+        if method is None:
+            continue
+        parsed_method = urlparse(method)
+        if (
+            parsed_method.scheme in ("http", "https")
+            and parsed_method.hostname == "spdx.org"
+            and parsed_method.fragment
+        ):
+            algorithm = parsed_method.fragment
             res = {
                 "@type": "spdx:Checksum",
                 "spdx:checksumValue": item.text,
