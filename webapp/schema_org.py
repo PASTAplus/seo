@@ -169,7 +169,12 @@ def convert_eml_to_schema_org(file_path: str, pid: str, doi: str, pasta: str,
     :param portal: Data portal base URI.
     :returns: JSON-LD string.
     """
-    metadata = etree.parse(file_path)
+    secure_parser = etree.XMLParser(
+        resolve_entities=False,
+        no_network=True,
+        load_dtd=False
+    )
+    metadata = etree.parse(file_path, parser=secure_parser)
 
     # Create properties that can't be derived from the EML record
     scope, identifier, revision = pid_triple(pid)
