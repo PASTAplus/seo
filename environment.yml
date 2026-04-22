@@ -24,22 +24,22 @@ dependencies:
   - itsdangerous=2.2.0
   - jansson=2.15.0
   - jinja2=3.1.6
-  - libcxx=22.1.3
+  - libcxx=22.1.4
   - libexpat=2.7.5
   - libffi=3.5.2
   - libiconv=1.18
-  - liblzma=5.8.2
-  - libsqlite=3.52.0
+  - liblzma=5.8.3
+  - libsqlite=3.53.0
   - libxcrypt=4.4.36
-  - libxml2=2.15.2
-  - libxml2-16=2.15.2
+  - libxml2=2.15.3
+  - libxml2-16=2.15.3
   - libxslt=1.1.43
   - libzlib=1.3.2
-  - lxml=6.0.2
+  - lxml=6.1.0
   - markupsafe=3.0.3
   - ncurses=6.5
   - openssl=3.6.2
-  - packaging=26.0
+  - packaging=26.1
   - pcre2=10.47
   - pip=26.0.1
   - pluggy=1.6.0
@@ -67,8 +67,8 @@ dependencies:
       - owlrl==7.1.4
       - prettytable==3.17.0
       - pyparsing==3.3.2
-      - pyshacl==0.31.0
+      - pyshacl==0.30.1
       - rdflib==7.6.0
-      - soso==1.0.0
+      - soso==1.0.1
       - wcwidth==0.6.0
 prefix: /opt/miniconda3/envs/seo
